@@ -1,0 +1,61 @@
+import argparse as ap
+import os
+import sys
+
+from . import data
+from . import base
+
+def main ():
+  args = parse_args()
+  args.func(args)
+
+def parse_args():
+  parser = ap.ArgumentParser()
+  
+  commands = parser.add_subparsers(dest="command")
+  commands.required = True
+
+  # init command
+  init_parser = commands.add_parser("init")
+  init_parser.set_defaults(func=init)
+
+  # hasher
+  hash_object_parser = commands.add_parser("hash-object")
+  hash_object_parser.set_defaults(func=hash_object)
+  hash_object_parser.add_argument("file")
+
+  # hash reader
+  cat_file_parser = commands.add_parser("cat-file")
+  cat_file_parser.set_defaults(func=cat_file)
+  cat_file_parser.add_argument("object")
+
+  # tree writer
+  write_tree_parser = commands.add_parser("write-tree")
+  write_tree_parser.set_defaults(func=write_tree)
+
+  return parser.parse_args()
+
+def init(args: ap.Namespace):
+  data.init()
+  print(f'Initialized an empty pygit repository in {os.getcwd()}/{data.GIT_DIR}')
+
+def hash_object(args: ap.Namespace):
+  with open(args.file, 'rb') as f:
+    print(data.hash_object(f.read()))
+
+def cat_file(args: ap.Namespace):
+  obj: bytes = data.get_object(args.object, expected = None)
+
+  sys.stdout.flush()
+  if obj.startswith(b'\xff\xfe') or obj.startswith(b'\xfe\xff'):
+    text: str = obj.decode(encoding = "utf-16")
+    sys.stdout.write(text)
+  else:
+    try:
+      sys.stdout.write(obj.decode())
+    except UnicodeDecodeError:
+      sys.stdout.buffer.write(obj)
+
+def write_tree(args: ap.Namespace):
+  base.write_tree()
+# pyright: strict
