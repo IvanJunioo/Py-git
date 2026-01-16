@@ -33,6 +33,11 @@ def parse_args():
   write_tree_parser = commands.add_parser("write-tree")
   write_tree_parser.set_defaults(func=write_tree)
 
+  # tree reader
+  read_tree_parser = commands.add_parser("read-tree")
+  read_tree_parser.set_defaults(func=read_tree)
+  read_tree_parser.add_argument('tree')
+
   return parser.parse_args()
 
 def init(args: ap.Namespace):
@@ -57,5 +62,9 @@ def cat_file(args: ap.Namespace):
       sys.stdout.buffer.write(obj)
 
 def write_tree(args: ap.Namespace):
-  base.write_tree()
+  print(base.write_tree())
+
+def read_tree(args: ap.Namespace):
+  base.read_tree(args.tree)
+
 # pyright: strict
