@@ -36,4 +36,9 @@ def set_HEAD(oid: str):
   with open(f'{GIT_DIR}/HEAD', "w") as f:
     f.write(oid)
 
+def get_HEAD():
+  if os.path.isfile(f'{GIT_DIR}/HEAD'):
+    with open(f'{GIT_DIR}/HEAD', "r") as f:
+      return f.read().strip()
+    
 # pyright: strict

@@ -1,11 +1,21 @@
 import os
 import datetime as dt
+import itertools
+import operator
+
+from dataclasses import dataclass
 
 from pathlib import Path
 from . import data
 from . import common_types
 
 OBJ_TYPE = common_types.ObjectType
+
+@dataclass(frozen=True)
+class Commit:
+  parent: str | None
+  tree: str
+  message: str
 
 def write_tree(directory: str = '.') -> str:
   entries: list[tuple[str, str, str]] = []
@@ -69,15 +79,40 @@ def commit(message: str):
   Commit sample output
   
   tree 6d4f078c8940ef4d654295790f6dd62e155fa793\n
-  2026-01-16 12:58:22\n\n
   This is a commit message!
   """
-  oid: str = data.hash_object(f"tree {write_tree()}\n{get_curr_time()}\n\n{message}\n".encode(), 'commit')
+  commit = f'tree {write_tree()}\n'
+
+  HEAD = data.get_HEAD()
+  if HEAD:
+    commit += f'parent {HEAD}\n'
+
+  oid: str = data.hash_object(f"{commit}\n{message}\n".encode(), 'commit')
 
   data.set_HEAD(oid)
-  
+
   return oid
 
+def get_commit(oid: str) -> Commit:
+  parent, tree = None, ""
+
+  commit = data.get_object(oid, "commit").decode()
+  lines = iter(commit.splitlines())
+  
+  for line in itertools.takewhile(operator.truth, lines):
+    key, value = line.split(" ", 1)
+
+    if key == "tree":
+      tree = value
+    elif key == "parent":
+      parent = value
+    else:
+      assert False, f'Unknown field {key}'
+  
+  message = '\n'.join(lines)
+
+  return Commit(tree = tree, parent = parent, message = message)
+  
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
 
