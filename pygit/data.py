@@ -32,4 +32,8 @@ def get_object(oid: str, expected: str | None = "blob"):
   
   return content
 
+def set_HEAD(oid: str):
+  with open(f'{GIT_DIR}/HEAD', "w") as f:
+    f.write(oid)
+
 # pyright: strict

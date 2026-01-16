@@ -1,4 +1,5 @@
 import os
+import datetime as dt
 
 from pathlib import Path
 from . import data
@@ -56,12 +57,52 @@ def get_tree(oid: str, base_path: str = ""):
   return result
 
 def read_tree(tree_oid: str):
+  empty_current_directory()
+
   for path, oid in get_tree(tree_oid, "./").items():
     os.makedirs(os.path.dirname(path), exist_ok=True)
     with open(path, 'wb') as f:
       f.write(data.get_object(oid))
 
+def commit(message: str):
+  """
+  Commit sample output
+  
+  tree 6d4f078c8940ef4d654295790f6dd62e155fa793\n
+  2026-01-16 12:58:22\n\n
+  This is a commit message!
+  """
+  oid: str = data.hash_object(f"tree {write_tree()}\n{get_curr_time()}\n\n{message}\n".encode(), 'commit')
+
+  data.set_HEAD(oid)
+  
+  return oid
+
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
+
+def empty_current_directory():
+  for root, dirnames, filenames in os.walk(".", topdown=False):
+    for filename in filenames:
+      path = os.path.relpath(os.path.join(root, filename))
+
+      if is_ignored(path) or not os.path.isfile(path):
+        continue
+
+      os.remove(path)
+    
+    for dirname in dirnames:
+      path = os.path.relpath(os.path.join(root, dirname))
+      
+      if is_ignored(path):
+        continue
+      
+      try:
+        os.rmdir(path)
+      except (FileNotFoundError, OSError):
+        pass
+
+def get_curr_time() -> str:
+  return dt.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 #pyright: strict
