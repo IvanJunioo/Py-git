@@ -112,7 +112,12 @@ def get_commit(oid: str) -> Commit:
   message = '\n'.join(lines)
 
   return Commit(tree = tree, parent = parent, message = message)
-  
+
+def checkout(oid: str):
+  commit = get_commit(oid)
+  read_tree(commit.tree)
+  data.set_HEAD(oid)
+
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
 

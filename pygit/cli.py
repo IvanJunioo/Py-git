@@ -47,6 +47,12 @@ def parse_args():
   # commit getter
   log_parser = commands.add_parser("log")
   log_parser.set_defaults(func=log)
+  log_parser.add_argument("oid", nargs="?")
+
+  # checkout
+  checkout_parser = commands.add_parser("checkout")
+  checkout_parser.set_defaults(func=checkout)
+  checkout_parser.add_argument("oid")
 
   return parser.parse_args()
 
@@ -81,7 +87,7 @@ def commit(args: ap.Namespace):
   print(base.commit(args.message))
 
 def log(args: ap.Namespace):
-  oid: str | None = data.get_HEAD()
+  oid: str | None = args.oid or data.get_HEAD()
 
   while oid:
     commit = base.get_commit(oid)
@@ -90,4 +96,7 @@ def log(args: ap.Namespace):
     print()
     
     oid = commit.parent
+
+def checkout(args: ap.Namespace):
+  base.checkout(args.oid)
 # pyright: strict
