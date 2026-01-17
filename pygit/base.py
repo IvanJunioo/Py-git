@@ -2,6 +2,7 @@ import os
 import datetime as dt
 import itertools
 import operator
+import string
 
 from dataclasses import dataclass
 
@@ -123,7 +124,23 @@ def create_tag(tag_name: str, oid: str):
   data.update_ref(path, oid)
 
 def get_oid(name: str):
-  return data.get_ref(name) or name
+  # Name is ref
+  refs_to_search: list[str] = [
+    name,
+    os.path.join("refs", name),
+    os.path.join("refs", "tags", name),
+    os.path.join("refs", "heads", name)
+  ]
+  for ref in refs_to_search:
+    if oid := data.get_ref(ref):
+      return oid
+  
+  # Name is SHA-1 (the oid itself)
+  is_hex = all(c in string.hexdigits for c in name)
+  if len(name) == 40 and is_hex:
+    return name
+
+  assert False, f'Unknown name {name}'
 
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
