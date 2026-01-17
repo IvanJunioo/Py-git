@@ -89,7 +89,7 @@ def commit(message: str):
 
   oid: str = data.hash_object(f"{commit}\n{message}\n".encode(), 'commit')
 
-  data.set_ref("HEAD", oid)
+  data.update_ref("HEAD", oid)
 
   return oid
 
@@ -116,10 +116,14 @@ def get_commit(oid: str) -> Commit:
 def checkout(oid: str):
   commit = get_commit(oid)
   read_tree(commit.tree)
-  data.set_ref("HEAD", oid)
+  data.update_ref("HEAD", oid)
 
-def tag(tag_name: str, oid: str):
-  pass
+def create_tag(tag_name: str, oid: str):
+  path: str = os.path.join("refs", "tags", tag_name)
+  data.update_ref(path, oid)
+
+def get_oid(name: str):
+  return data.get_ref(name) or name
 
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts

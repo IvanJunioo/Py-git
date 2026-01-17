@@ -32,8 +32,11 @@ def get_object(oid: str, expected: str | None = "blob"):
   
   return content
 
-def set_ref(ref: str, oid: str):
-  with open(f'{GIT_DIR}/{ref}', "w") as f:
+def update_ref(ref: str, oid: str):
+  path = f"{GIT_DIR}/{ref}"
+  os.makedirs(os.path.dirname(path), exist_ok=True)
+
+  with open(path, "w") as f:
     f.write(oid)
 
 def get_ref(ref: str):
