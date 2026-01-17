@@ -32,13 +32,13 @@ def get_object(oid: str, expected: str | None = "blob"):
   
   return content
 
-def set_HEAD(oid: str):
-  with open(f'{GIT_DIR}/HEAD', "w") as f:
+def set_ref(ref: str, oid: str):
+  with open(f'{GIT_DIR}/{ref}', "w") as f:
     f.write(oid)
 
-def get_HEAD():
-  if os.path.isfile(f'{GIT_DIR}/HEAD'):
-    with open(f'{GIT_DIR}/HEAD', "r") as f:
+def get_ref(ref: str):
+  if os.path.isfile(f'{GIT_DIR}/{ref}'):
+    with open(f'{GIT_DIR}/{ref}', "r") as f:
       return f.read().strip()
     
 # pyright: strict

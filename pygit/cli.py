@@ -37,7 +37,7 @@ def parse_args():
   # tree reader
   read_tree_parser = commands.add_parser("read-tree")
   read_tree_parser.set_defaults(func=read_tree)
-  read_tree_parser.add_argument('tree')
+  read_tree_parser.add_argument("tree")
 
   # commit command
   commit_parser = commands.add_parser("commit")
@@ -53,6 +53,12 @@ def parse_args():
   checkout_parser = commands.add_parser("checkout")
   checkout_parser.set_defaults(func=checkout)
   checkout_parser.add_argument("oid")
+
+  # tag
+  tag_parser = commands.add_parser("tag")
+  tag_parser.set_defaults(func=tag)
+  tag_parser.add_argument("tag")
+  tag_parser.add_argument("oid", nargs="?")
 
   return parser.parse_args()
 
@@ -87,7 +93,7 @@ def commit(args: ap.Namespace):
   print(base.commit(args.message))
 
 def log(args: ap.Namespace):
-  oid: str | None = args.oid or data.get_HEAD()
+  oid: str | None = args.oid or data.get_ref("HEAD")
 
   while oid:
     commit = base.get_commit(oid)
@@ -99,4 +105,11 @@ def log(args: ap.Namespace):
 
 def checkout(args: ap.Namespace):
   base.checkout(args.oid)
+
+def tag(args: ap.Namespace):
+  oid: str | None = args.oid or data.get_ref("HEAD")
+
+  assert oid, f"There should be at least one commit made in the repository!"
+  base.tag(args.tag, oid)
+
 # pyright: strict

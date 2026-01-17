@@ -83,13 +83,13 @@ def commit(message: str):
   """
   commit = f'tree {write_tree()}\n'
 
-  HEAD = data.get_HEAD()
+  HEAD = data.get_ref("HEAD")
   if HEAD:
     commit += f'parent {HEAD}\n'
 
   oid: str = data.hash_object(f"{commit}\n{message}\n".encode(), 'commit')
 
-  data.set_HEAD(oid)
+  data.set_ref("HEAD", oid)
 
   return oid
 
@@ -116,7 +116,10 @@ def get_commit(oid: str) -> Commit:
 def checkout(oid: str):
   commit = get_commit(oid)
   read_tree(commit.tree)
-  data.set_HEAD(oid)
+  data.set_ref("HEAD", oid)
+
+def tag(tag_name: str, oid: str):
+  pass
 
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
