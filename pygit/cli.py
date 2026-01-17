@@ -49,7 +49,7 @@ def parse_args():
   # commit getter
   log_parser = commands.add_parser("log")
   log_parser.set_defaults(func=log)
-  log_parser.add_argument("oid", type=oid, nargs="?")
+  log_parser.add_argument("oid", default= "@", type=oid, nargs="?")
 
   # checkout
   checkout_parser = commands.add_parser("checkout")
@@ -60,7 +60,7 @@ def parse_args():
   tag_parser = commands.add_parser("tag")
   tag_parser.set_defaults(func=tag)
   tag_parser.add_argument("tag")
-  tag_parser.add_argument("oid", type=oid, nargs="?")
+  tag_parser.add_argument("oid", default= "@", type=oid, nargs="?")
 
   return parser.parse_args()
 
@@ -95,7 +95,7 @@ def commit(args: ap.Namespace):
   print(base.commit(args.message))
 
 def log(args: ap.Namespace):
-  oid: str | None = args.oid or data.get_ref("HEAD")
+  oid: str | None = args.oid
 
   while oid:
     commit = base.get_commit(oid)
@@ -109,9 +109,9 @@ def checkout(args: ap.Namespace):
   base.checkout(args.oid)
 
 def tag(args: ap.Namespace):
-  oid: str | None = args.oid or data.get_ref("HEAD")
+  oid: str | None = args.oid
 
   assert oid, f"There should be at least one commit made in the repository!"
-  base.create_tag(args.tag, oid)
+  base.create_tag(args.tag, args.oid)
 
 # pyright: strict

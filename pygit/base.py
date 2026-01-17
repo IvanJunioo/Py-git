@@ -124,6 +124,9 @@ def create_tag(tag_name: str, oid: str):
   data.update_ref(path, oid)
 
 def get_oid(name: str):
+  if name == '@':
+    name = 'HEAD'
+    
   # Name is ref
   refs_to_search: list[str] = [
     name,
