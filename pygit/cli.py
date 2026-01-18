@@ -119,7 +119,17 @@ def tag(args: ap.Namespace):
   base.create_tag(args.tag, args.oid)
 
 def k(_: ap.Namespace):
+  oids: set[str | None] = set()
+
   for refname, ref in data.iter_refs():
     print(refname, ref)
-    
+    oids.add(ref)
+  
+  print()
+  for oid in base.iter_commits_and_parents(oids):
+    commit = base.get_commit(oid)
+    print(oid)
+    if parent := commit.parent:
+      print(f"Parent: {parent}\n")
+
 # pyright: strict

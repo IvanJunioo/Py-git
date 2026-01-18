@@ -79,19 +79,16 @@ def update_ref(ref: str, oid: str):
 def get_ref(ref: str):
   """
   Returns the referenced hash key of an object
-  
-  :param ref: Description
-  :type ref: str
   """
-  if os.path.isfile(f'{GIT_DIR}/{ref}'):
-    with open(f'{GIT_DIR}/{ref}', "r") as f:
+  if os.path.isfile(path := os.path.join(GIT_DIR, ref)):
+    with open(path, "r") as f:
       return f.read().strip()
   
 def iter_refs():
   refs: list[str] = ["HEAD"]
   for root, _, filenames in os.walk(os.path.join(GIT_DIR, "refs")):
     root = os.path.relpath(root, GIT_DIR)
-    refs.extend(f'{root}/{name}' for name in filenames)
+    refs.extend(os.path.join(root, name) for name in filenames)
   
   for refname in refs:
     yield refname, get_ref(refname)

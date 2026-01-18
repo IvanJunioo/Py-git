@@ -145,6 +145,19 @@ def get_oid(name: str):
 
   assert False, f'Unknown name {name}'
 
+def iter_commits_and_parents(oids: set[str | None]):
+  visited: set[str] = set()
+
+  while oids:
+    oid: str | None = oids.pop()
+    if (oid in visited or not oid): continue
+
+    visited.add(oid)
+    yield oid
+
+    commit = get_commit(oid)
+    oids.add(commit.parent)
+
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
 
