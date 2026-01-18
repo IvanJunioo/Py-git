@@ -86,5 +86,13 @@ def get_ref(ref: str):
   if os.path.isfile(f'{GIT_DIR}/{ref}'):
     with open(f'{GIT_DIR}/{ref}', "r") as f:
       return f.read().strip()
-    
+  
+def iter_refs():
+  refs: list[str] = ["HEAD"]
+  for root, _, filenames in os.walk(os.path.join(GIT_DIR, "refs")):
+    root = os.path.relpath(root, GIT_DIR)
+    refs.extend(f'{root}/{name}' for name in filenames)
+  
+  for refname in refs:
+    yield refname, get_ref(refname)
 # pyright: strict

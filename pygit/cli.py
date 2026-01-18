@@ -62,6 +62,10 @@ def parse_args():
   tag_parser.add_argument("tag")
   tag_parser.add_argument("oid", default= "@", type=oid, nargs="?")
 
+  # gitk (see all refs)
+  k_parser = commands.add_parser("k")
+  k_parser.set_defaults(func=k)
+  
   return parser.parse_args()
 
 def init(args: ap.Namespace):
@@ -85,7 +89,7 @@ def cat_file(args: ap.Namespace):
     except UnicodeDecodeError:
       sys.stdout.buffer.write(obj)
 
-def write_tree(args: ap.Namespace):
+def write_tree(_: ap.Namespace):
   print(base.write_tree())
 
 def read_tree(args: ap.Namespace):
@@ -114,4 +118,8 @@ def tag(args: ap.Namespace):
   assert oid, f"There should be at least one commit made in the repository!"
   base.create_tag(args.tag, args.oid)
 
+def k(_: ap.Namespace):
+  for refname, ref in data.iter_refs():
+    print(refname, ref)
+    
 # pyright: strict
