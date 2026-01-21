@@ -92,4 +92,6 @@ def iter_refs():
   
   for refname in refs:
     yield refname, get_ref(refname)
+  
+
 # pyright: strict

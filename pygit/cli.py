@@ -1,5 +1,6 @@
 import argparse as ap
 import os
+import subprocess
 import sys
 import textwrap
 
@@ -119,17 +120,34 @@ def tag(args: ap.Namespace):
   base.create_tag(args.tag, args.oid)
 
 def k(_: ap.Namespace):
+  dot: str = 'digraph commits {\n'
   oids: set[str | None] = set()
 
   for refname, ref in data.iter_refs():
-    print(refname, ref)
+    dot += f'"{refname}" [shape=note]\n'
+    dot += f'"{refname}" -> "{ref}"\n'
     oids.add(ref)
   
-  print()
   for oid in base.iter_commits_and_parents(oids):
     commit = base.get_commit(oid)
-    print(oid)
+    dot += f'"{oid}" [shape=box style=filled label="{oid[:10]}"]\n'
     if parent := commit.parent:
-      print(f"Parent: {parent}\n")
+      dot += f'"{oid}" -> "{parent}"\n'
 
+  dot += "}"
+  print(dot)
+
+
+  proc = subprocess.run(
+    ["dot", "-Tpng"],
+    input=dot.encode(),
+    stdout=subprocess.PIPE,
+    check=True,
+  )
+
+  with open("commits.png", "wb") as f:
+    f.write(proc.stdout)
+
+  os.startfile("commits.png")
+    
 # pyright: strict
