@@ -100,16 +100,12 @@ def commit(args: ap.Namespace):
   print(base.commit(args.message))
 
 def log(args: ap.Namespace):
-  oid: str | None = args.oid
-
-  while oid:
+  for oid in base.iter_commits_and_parents({args.oid}):
     commit = base.get_commit(oid)
     print(f"commit {oid}")
     print(textwrap.indent(commit.message, "\t"))
     print()
     
-    oid = commit.parent
-
 def checkout(args: ap.Namespace):
   base.checkout(args.oid)
 

@@ -5,6 +5,7 @@ import operator
 import string
 
 from dataclasses import dataclass
+from collections import deque
 
 from pathlib import Path
 from . import data
@@ -145,18 +146,19 @@ def get_oid(name: str):
 
   assert False, f'Unknown name {name}'
 
-def iter_commits_and_parents(oids: set[str | None]):
-  visited: set[str] = set()
+def iter_commits_and_parents(oids_: set[str | None]):
+  oids: deque[str | None] = deque(oids_)
+  visited: deque[str] = deque()
 
   while oids:
-    oid: str | None = oids.pop()
+    oid: str | None = oids.popleft()
     if (oid in visited or not oid): continue
 
-    visited.add(oid)
+    visited.appendleft(oid)
     yield oid
 
     commit = get_commit(oid)
-    oids.add(commit.parent)
+    oids.appendleft(commit.parent)
 
 def is_ignored(path: str):
   return ".pygit" in Path(path).parts
